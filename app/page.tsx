@@ -10,10 +10,6 @@ export default function Home() {
   const [thinking, setThinking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // ★ 追加: キーボード高さで inputBar を持ち上げる
-  const [keyboardOffset, setKeyboardOffset] = useState(0);
-  const inputBarRef = useRef<HTMLDivElement>(null);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -21,28 +17,6 @@ export default function Home() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, thinking]);
-
-  // 📌 Android WebView 向け：innerHeight を使ったキーボード検知
-  useEffect(() => {
-    let initialHeight = window.innerHeight;
-
-    const handleResize = () => {
-      const currentHeight = window.innerHeight;
-      const diff = initialHeight - currentHeight;
-
-      if (diff > 150) {
-        // キーボード表示
-        setKeyboardOffset(diff);
-      } else {
-        // キーボード非表示
-        setKeyboardOffset(0);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
 
   const sendMessage = async () => {
     if (!input) return;
@@ -76,7 +50,6 @@ export default function Home() {
       console.warn("MyBridge is not available");
     }
   };
-
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") sendMessage();
   };
@@ -85,26 +58,7 @@ export default function Home() {
     <div style={styles.root}>
       <div style={styles.chatContainer}>
         <div style={styles.header}>ループバックチャット</div>
-
-        <div style={styles.chatArea}>
-          {messages.map((msg, i) => (
-            <MessageBubble key={i} role={msg.role} text={msg.text} />
-          ))}
-
-          {/* Bot Thinking Animation */}
-          {thinking && <ThinkingBubble />}
-
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* ▼▼ キーボード高さに応じて translateY する部分 ▼▼ */}
-        <div
-          ref={inputBarRef}
-          style={{
-            ...styles.inputBar,
-            transform: `translateY(-${keyboardOffset}px)`,
-          }}
-        >
+        <div style={styles.inputBar}>
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -116,7 +70,17 @@ export default function Home() {
             送信
           </button>
         </div>
-        {/* ▲▲ ここまで ▲▲ */}
+
+        <div style={styles.chatArea}>
+          {messages.map((msg, i) => (
+            <MessageBubble key={i} role={msg.role} text={msg.text} />
+          ))}
+
+          {/* Bot Thinking Animation */}
+          {thinking && <ThinkingBubble />}
+
+          <div ref={messagesEndRef} />
+        </div>
       </div>
     </div>
   );
@@ -272,7 +236,6 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 12,
     borderTop: "1px solid #333",
     background: "#1E1E1E",
-    transition: "transform 0.25s ease",
   },
 
   input: {
