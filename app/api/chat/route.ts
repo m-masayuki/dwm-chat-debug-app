@@ -5,6 +5,6 @@ export async function POST(req: Request) {
   const { message } = await req.json();
 
   return NextResponse.json({
-    reply: message ?? "",
+    reply: "loopback::" + message,
   });
 }

@@ -46,7 +46,7 @@ export default function Home() {
     // ★ MAUI WebView にメッセージ送信する部分
     if (typeof window !== "undefined" && (window as any).external?.notify) {
       (window as any).external.notify(
-        JSON.stringify({ reply: "loopback::" + data.reply })
+        JSON.stringify({ reply: data.reply })
       );
     }
   };
