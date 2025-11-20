@@ -6,4 +6,10 @@ declare global {
   }
 }
 
+declare global {
+  interface Window {
+    receiveFromMaui: (msg: string) => void;
+  }
+}
+
 export {};

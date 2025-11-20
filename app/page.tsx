@@ -53,7 +53,9 @@ export default function Home() {
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") sendMessage();
   };
-
+  window.receiveFromMaui = (msg: string) => {
+    alert(msg);
+  };
   return (
     <div style={styles.root}>
       <div style={styles.chatContainer}>
