@@ -16,9 +16,10 @@ export default function Home() {
 
   useEffect(() => {
     // MAUI → JS のメッセージ受信
-    window.receiveFromMaui = (msg: string) => {
-      alert(msg);
+    window.receiveFromMaui = (data: any) => {
+      alert(JSON.stringify(data, null, 2));
     };
+
 
     // クリーンアップ（不要ならなくてもよい）
     return () => {
