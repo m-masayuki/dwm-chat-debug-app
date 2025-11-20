@@ -10,6 +10,10 @@ export default function Home() {
   const [thinking, setThinking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // ★ 追加: キーボード高さで inputBar を持ち上げる
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+  const inputBarRef = useRef<HTMLDivElement>(null);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -17,6 +21,30 @@ export default function Home() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, thinking]);
+
+  // 📌 ★ 追加：キーボード対応（visualViewport）
+  useEffect(() => {
+    const handleResize = () => {
+      const vv = window.visualViewport;
+      if (!vv) return;
+
+      const heightDiff = window.innerHeight - vv.height;
+
+      if (heightDiff > 150) {
+        // キーボード表示
+        setKeyboardOffset(heightDiff);
+      } else {
+        // キーボード非表示
+        setKeyboardOffset(0);
+      }
+    };
+
+    window.visualViewport?.addEventListener("resize", handleResize);
+
+    return () => {
+      window.visualViewport?.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const sendMessage = async () => {
     if (!input) return;
@@ -50,6 +78,7 @@ export default function Home() {
       console.warn("MyBridge is not available");
     }
   };
+
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") sendMessage();
   };
@@ -70,7 +99,14 @@ export default function Home() {
           <div ref={messagesEndRef} />
         </div>
 
-        <div style={styles.inputBar}>
+        {/* ▼▼ キーボード高さに応じて translateY する部分 ▼▼ */}
+        <div
+          ref={inputBarRef}
+          style={{
+            ...styles.inputBar,
+            transform: `translateY(-${keyboardOffset}px)`,
+          }}
+        >
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -82,6 +118,7 @@ export default function Home() {
             送信
           </button>
         </div>
+        {/* ▲▲ ここまで ▲▲ */}
       </div>
     </div>
   );
@@ -237,6 +274,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 12,
     borderTop: "1px solid #333",
     background: "#1E1E1E",
+    transition: "transform 0.25s ease",
   },
 
   input: {
