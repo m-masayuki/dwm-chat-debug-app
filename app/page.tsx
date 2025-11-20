@@ -4,7 +4,9 @@ import { useState, useRef, useEffect } from "react";
 
 export default function Home() {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<{ role: "user" | "bot"; text: string }[]>([]);
+  const [messages, setMessages] = useState<
+    { role: "user" | "bot"; text: string }[]
+  >([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -38,18 +40,25 @@ export default function Home() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.header}>Simple ChatGPT Style</div>
+      <div style={styles.header}>Chat</div>
 
       <div style={styles.chatArea}>
         {messages.map((msg, i) => (
           <div
             key={i}
             style={{
-              ...styles.message,
-              ...(msg.role === "user" ? styles.userMsg : styles.botMsg),
+              ...styles.messageWrapper,
+              justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
             }}
           >
-            {msg.text}
+            <div
+              style={{
+                ...styles.message,
+                ...(msg.role === "user" ? styles.userMsg : styles.botMsg),
+              }}
+            >
+              {msg.text}
+            </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
@@ -92,29 +101,35 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1,
     overflowY: "auto",
     padding: 20,
+    display: "flex",
+    flexDirection: "column",
+  },
+
+  messageWrapper: {
+    display: "flex",
+    width: "100%",
+    marginBottom: 12,
   },
 
   message: {
-    maxWidth: "80%",
+    maxWidth: "70%",
     padding: "10px 14px",
-    borderRadius: 12,
-    marginBottom: 10,
-    lineHeight: "1.4",
+    borderRadius: 14,
     fontSize: 15,
+    lineHeight: "1.4",
     boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
   },
 
   userMsg: {
-    alignSelf: "flex-end",
     background: "#007AFF",
     color: "white",
-    borderBottomRightRadius: 2,
+    borderBottomRightRadius: 4,
   },
 
   botMsg: {
-    alignSelf: "flex-start",
     background: "white",
-    borderBottomLeftRadius: 2,
+    color: "#333",
+    borderBottomLeftRadius: 4,
   },
 
   inputBar: {
