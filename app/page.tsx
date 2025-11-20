@@ -43,12 +43,12 @@ export default function Home() {
     // Bot メッセージ追加
     setMessages((prev) => [...prev, { role: "bot", text: data.reply }]);
 
-    // ★ MAUI WebView にメッセージ送信する部分
-    if (window.MyBridge && typeof window.MyBridge.postMessage === "function") {
-      window.MyBridge.postMessage(data.reply);
-    } else {
-      console.warn("MyBridge is not available");
-    }
+    // // ★ MAUI WebView にメッセージ送信する部分
+    // if (window.MyBridge && typeof window.MyBridge.postMessage === "function") {
+    //   window.MyBridge.postMessage(data.reply);
+    // } else {
+    //   console.warn("MyBridge is not available");
+    // }
   };
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") sendMessage();
