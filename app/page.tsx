@@ -42,8 +42,14 @@ export default function Home() {
 
     // Bot メッセージ追加
     setMessages((prev) => [...prev, { role: "bot", text: data.reply }]);
-  };
 
+    // ★ MAUI WebView にメッセージ送信する部分
+    if (typeof window !== "undefined" && (window as any).external?.notify) {
+      (window as any).external.notify(
+        JSON.stringify({ reply: "loopback::" + data.reply })
+      );
+    }
+  };
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") sendMessage();
   };
