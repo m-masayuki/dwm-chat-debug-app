@@ -22,29 +22,27 @@ export default function Home() {
     scrollToBottom();
   }, [messages, thinking]);
 
-  // 📌 ★ 追加：キーボード対応（visualViewport）
+  // 📌 Android WebView 向け：innerHeight を使ったキーボード検知
   useEffect(() => {
+    let initialHeight = window.innerHeight;
+
     const handleResize = () => {
-      const vv = window.visualViewport;
-      if (!vv) return;
+      const currentHeight = window.innerHeight;
+      const diff = initialHeight - currentHeight;
 
-      const heightDiff = window.innerHeight - vv.height;
-
-      if (heightDiff > 150) {
+      if (diff > 150) {
         // キーボード表示
-        setKeyboardOffset(heightDiff);
+        setKeyboardOffset(diff);
       } else {
         // キーボード非表示
         setKeyboardOffset(0);
       }
     };
 
-    window.visualViewport?.addEventListener("resize", handleResize);
-
-    return () => {
-      window.visualViewport?.removeEventListener("resize", handleResize);
-    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
+
 
   const sendMessage = async () => {
     if (!input) return;
