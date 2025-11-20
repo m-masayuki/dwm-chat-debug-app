@@ -75,7 +75,7 @@ export default function Home() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder="メッセージを入力..."
+            placeholder="./new_set_value?paramno=C1-01&value=10"
             style={styles.input}
           />
           <button style={styles.sendBtn} onClick={sendMessage}>
