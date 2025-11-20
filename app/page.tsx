@@ -44,10 +44,10 @@ export default function Home() {
     setMessages((prev) => [...prev, { role: "bot", text: data.reply }]);
 
     // ★ MAUI WebView にメッセージ送信する部分
-    if (typeof window !== "undefined" && (window as any).external?.notify) {
-      (window as any).external.notify(
-        JSON.stringify({ reply: data.reply })
-      );
+    if (window.MyBridge && typeof window.MyBridge.postMessage === "function") {
+      window.MyBridge.postMessage(data.reply);
+    } else {
+      console.warn("MyBridge is not available");
     }
   };
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
