@@ -15,6 +15,19 @@ export default function Home() {
   };
 
   useEffect(() => {
+    // MAUI → JS のメッセージ受信
+    window.receiveFromMaui = (msg: string) => {
+      alert(msg);
+    };
+
+    // クリーンアップ（不要ならなくてもよい）
+    return () => {
+      window.receiveFromMaui = undefined as any;
+    };
+  }, []);
+
+
+  useEffect(() => {
     scrollToBottom();
   }, [messages, thinking]);
 
@@ -52,9 +65,6 @@ export default function Home() {
   };
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") sendMessage();
-  };
-  window.receiveFromMaui = (msg: string) => {
-    alert(msg);
   };
   return (
     <div style={styles.root}>
