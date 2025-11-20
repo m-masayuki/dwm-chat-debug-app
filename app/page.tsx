@@ -7,6 +7,7 @@ export default function Home() {
   const [messages, setMessages] = useState<
     { role: "user" | "bot"; text: string }[]
   >([]);
+  const [thinking, setThinking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -15,14 +16,18 @@ export default function Home() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, thinking]);
 
   const sendMessage = async () => {
     if (!input) return;
-
     const userMsg = input;
+
+    // ユーザーのメッセージ追加
     setMessages((prev) => [...prev, { role: "user", text: userMsg }]);
     setInput("");
+
+    // 「…」アニメーション開始
+    setThinking(true);
 
     const res = await fetch("/api/chat", {
       method: "POST",
@@ -31,6 +36,11 @@ export default function Home() {
     });
 
     const data = await res.json();
+
+    // 「…」アニメーション停止
+    setThinking(false);
+
+    // Bot メッセージ追加
     setMessages((prev) => [...prev, { role: "bot", text: data.reply }]);
   };
 
@@ -39,62 +49,120 @@ export default function Home() {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>Chat</div>
+    <div style={styles.root}>
+      <div style={styles.chatContainer}>
+        <div style={styles.header}>ループバックチャット</div>
 
-      <div style={styles.chatArea}>
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            style={{
-              ...styles.messageWrapper,
-              justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
-            }}
-          >
-            <div
-              style={{
-                ...styles.message,
-                ...(msg.role === "user" ? styles.userMsg : styles.botMsg),
-              }}
-            >
-              {msg.text}
-            </div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
+        <div style={styles.chatArea}>
+          {messages.map((msg, i) => (
+            <MessageBubble key={i} role={msg.role} text={msg.text} />
+          ))}
 
-      <div style={styles.inputBar}>
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKey}
-          placeholder="メッセージを入力..."
-          style={styles.input}
-        />
-        <button style={styles.sendBtn} onClick={sendMessage}>
-          送信
-        </button>
+          {/* Bot Thinking Animation */}
+          {thinking && <ThinkingBubble />}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        <div style={styles.inputBar}>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKey}
+            placeholder="メッセージを入力..."
+            style={styles.input}
+          />
+          <button style={styles.sendBtn} onClick={sendMessage}>
+            送信
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
+/** 吹き出しコンポーネント */
+function MessageBubble({
+  role,
+  text,
+}: {
+  role: "user" | "bot";
+  text: string;
+}) {
+  const isUser = role === "user";
+
+  return (
+    <div
+      style={{
+        ...styles.row,
+        justifyContent: isUser ? "flex-end" : "flex-start",
+      }}
+    >
+      {!isUser && <BotIcon />}
+
+      <div
+        style={{
+          ...styles.message,
+          ...(isUser ? styles.userMsg : styles.botMsg),
+        }}
+      >
+        {text}
+      </div>
+    </div>
+  );
+}
+
+/** Bot の丸アイコン */
+function BotIcon() {
+  return <div style={styles.botIcon}>🤖</div>;
+}
+
+/** 「…」アニメーション */
+function ThinkingBubble() {
+  return (
+    <div style={{ ...styles.row, justifyContent: "flex-start" }}>
+      <BotIcon />
+      <div style={styles.thinkingBubble}>
+        <span style={styles.dot1}>●</span>
+        <span style={styles.dot2}>●</span>
+        <span style={styles.dot3}>●</span>
+      </div>
+    </div>
+  );
+}
+
+//
+// ────────────────────────────────────────────
+// Styles
+// ────────────────────────────────────────────
+//
+
 const styles: Record<string, React.CSSProperties> = {
-  container: {
+  root: {
+    background: "#0D0D0D",
     height: "100vh",
     display: "flex",
+    justifyContent: "center",
+    padding: 20,
+  },
+
+  chatContainer: {
+    width: "100%",
+    maxWidth: 800,
+    background: "#1E1E1E",
+    borderRadius: 16,
+    display: "flex",
     flexDirection: "column",
-    background: "#f7f7f8",
-    fontFamily: "sans-serif",
+    overflow: "hidden",
+    border: "1px solid #333",
   },
 
   header: {
-    padding: 12,
+    padding: 14,
     fontSize: 18,
     fontWeight: "bold",
-    borderBottom: "1px solid #ddd",
-    background: "white",
+    color: "#fff",
+    borderBottom: "1px solid #333",
   },
 
   chatArea: {
@@ -103,21 +171,33 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 20,
     display: "flex",
     flexDirection: "column",
+    gap: 16,
   },
 
-  messageWrapper: {
+  row: {
     display: "flex",
-    width: "100%",
-    marginBottom: 12,
+    alignItems: "flex-start",
+    gap: 10,
+  },
+
+  botIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: "50%",
+    background: "#3A3A3A",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 18,
+    color: "white",
   },
 
   message: {
     maxWidth: "70%",
     padding: "10px 14px",
-    borderRadius: 14,
+    borderRadius: 12,
     fontSize: 15,
-    lineHeight: "1.4",
-    boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+    lineHeight: "1.5",
   },
 
   userMsg: {
@@ -127,23 +207,39 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   botMsg: {
-    background: "white",
-    color: "#333",
+    background: "#2A2A2A",
+    color: "#ddd",
     borderBottomLeftRadius: 4,
   },
 
+  thinkingBubble: {
+    background: "#2A2A2A",
+    borderRadius: 12,
+    padding: "8px 14px",
+    display: "flex",
+    gap: 6,
+    color: "#ccc",
+    fontSize: 14,
+  },
+
+  dot1: { animation: "blink 1.4s infinite 0s" },
+  dot2: { animation: "blink 1.4s infinite 0.2s" },
+  dot3: { animation: "blink 1.4s infinite 0.4s" },
+
   inputBar: {
     display: "flex",
-    padding: 10,
-    borderTop: "1px solid #ddd",
-    background: "white",
+    padding: 12,
+    borderTop: "1px solid #333",
+    background: "#1E1E1E",
   },
 
   input: {
     flex: 1,
-    padding: 10,
+    padding: 12,
     borderRadius: 8,
-    border: "1px solid #ccc",
+    border: "1px solid #444",
+    background: "#111",
+    color: "#fff",
     marginRight: 10,
     fontSize: 15,
   },
@@ -158,3 +254,16 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 14,
   },
 };
+
+/* グローバルCSSアニメーション挿入用 */
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
+  style.innerHTML = `
+    @keyframes blink {
+      0% { opacity: 0.1; }
+      20% { opacity: 1; }
+      100% { opacity: 0.1; }
+    }
+  `;
+  document.head.appendChild(style);
+}
