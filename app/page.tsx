@@ -71,6 +71,16 @@ export default function Home() {
     <div style={styles.root}>
       <div style={styles.chatContainer}>
         <div style={styles.header}>ループバックチャット</div>
+        <div style={styles.chatArea}>
+          {messages.map((msg, i) => (
+            <MessageBubble key={i} role={msg.role} text={msg.text} />
+          ))}
+
+          {/* Bot Thinking Animation */}
+          {thinking && <ThinkingBubble />}
+
+          <div ref={messagesEndRef} />
+        </div>
         <div style={styles.inputBar}>
           <input
             value={input}
@@ -82,17 +92,6 @@ export default function Home() {
           <button style={styles.sendBtn} onClick={sendMessage}>
             送信
           </button>
-        </div>
-
-        <div style={styles.chatArea}>
-          {messages.map((msg, i) => (
-            <MessageBubble key={i} role={msg.role} text={msg.text} />
-          ))}
-
-          {/* Bot Thinking Animation */}
-          {thinking && <ThinkingBubble />}
-
-          <div ref={messagesEndRef} />
         </div>
       </div>
     </div>
